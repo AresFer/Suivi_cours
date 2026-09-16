@@ -68,18 +68,10 @@
 </head>
 <body class="bg-ios-bg dark:bg-ios-darkBg text-slate-900 dark:text-slate-100 flex flex-col h-screen overflow-hidden font-sans antialiased selection:bg-ios-blue selection:text-white">
 
-    <!-- HEADER -->
+    <!-- HEADER (Épuré) -->
     <header class="bg-white/80 dark:bg-ios-darkCard/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-20 shrink-0 shadow-sm" style="padding-top: env(safe-area-inset-top);">
-        <div class="px-4 py-3 flex justify-between items-center">
+        <div class="px-4 py-3 flex justify-center items-center">
             <h1 class="text-2xl font-bold tracking-tight">Mes Cours</h1>
-            <div class="flex gap-2">
-                <div class="bg-ios-green/10 text-ios-green px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                    <i class="fas fa-arrow-down"></i> <span id="total-paid">0</span>€
-                </div>
-                <div class="bg-ios-red/10 text-ios-red px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                    <i class="fas fa-clock"></i> <span id="total-pending">0</span>€
-                </div>
-            </div>
         </div>
         <div class="flex justify-center gap-6 pb-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
             <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-ios-green"></div> Payé</span>
@@ -234,6 +226,23 @@
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4 shrink-0"></div>
         <h2 class="text-xl font-bold mb-4 text-center shrink-0">Bilan Financier</h2>
         
+        <!-- NOUVEAU : BILAN GLOBAL (Depuis toujours) -->
+        <div class="mb-5 shrink-0 bg-gray-50 dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 text-center">Bilan Global (Depuis toujours)</h3>
+            <div class="flex justify-around items-center">
+                <div class="text-center flex-1">
+                    <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide mb-1">Total Encaissé</p>
+                    <p class="text-xl font-bold text-ios-green"><span id="total-paid">0</span>€</p>
+                </div>
+                <div class="w-px h-8 bg-gray-300 dark:bg-gray-600 mx-2"></div>
+                <div class="text-center flex-1">
+                    <p class="text-[10px] text-ios-red font-bold uppercase tracking-wide mb-1">Reste à Percevoir</p>
+                    <p class="text-xl font-bold text-ios-red"><span id="total-pending">0</span>€</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 shrink-0 text-center">Bilan Périodique</h3>
         <div class="flex gap-2 mb-4 shrink-0 bg-gray-100 dark:bg-[#2C2C2E] p-1 rounded-xl">
             <button id="btnBilanMonth" onclick="setBilanType('month')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition">Mois</button>
             <button id="btnBilanWeek" onclick="setBilanType('week')" class="flex-1 py-2 text-sm font-semibold text-gray-500 transition">Semaine</button>
