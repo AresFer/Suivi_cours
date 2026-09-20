@@ -68,7 +68,7 @@
 </head>
 <body class="bg-ios-bg dark:bg-ios-darkBg text-slate-900 dark:text-slate-100 flex flex-col h-screen overflow-hidden font-sans antialiased selection:bg-ios-blue selection:text-white">
 
-    <!-- HEADER (Épuré) -->
+    <!-- HEADER -->
     <header class="bg-white/80 dark:bg-ios-darkCard/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-20 shrink-0 shadow-sm" style="padding-top: env(safe-area-inset-top);">
         <div class="px-4 py-3 flex justify-center items-center">
             <h1 class="text-2xl font-bold tracking-tight">Mes Cours</h1>
@@ -226,7 +226,7 @@
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4 shrink-0"></div>
         <h2 class="text-xl font-bold mb-4 text-center shrink-0">Bilan Financier</h2>
         
-        <!-- NOUVEAU : BILAN GLOBAL (Depuis toujours) -->
+        <!-- BILAN GLOBAL -->
         <div class="mb-5 shrink-0 bg-gray-50 dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 text-center">Bilan Global (Depuis toujours)</h3>
             <div class="flex justify-around items-center">
@@ -349,11 +349,11 @@
             updateDashboard();
 
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                initialView: 'timeGridDay', // Reste sur le Jour par défaut sur mobile, mais modifiable via le menu
+                initialView: 'timeGridDay',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
                 locale: 'fr',
-                slotMinTime: '08:00:00',
-                slotMaxTime: '22:00:00',
+                slotMinTime: '08:00:00', // Modifiable si tu veux voir plus tôt que 8h le matin
+                slotMaxTime: '24:00:00', // MODIFICATION ICI : Affiche le calendrier jusqu'à minuit
                 allDaySlot: false,
                 height: '100%',
                 nowIndicator: true,
