@@ -68,7 +68,7 @@
 </head>
 <body class="bg-ios-bg dark:bg-ios-darkBg text-slate-900 dark:text-slate-100 flex flex-col h-screen overflow-hidden font-sans antialiased selection:bg-ios-blue selection:text-white">
 
-    <!-- HEADER -->
+    <!-- HEADER (Épuré) -->
     <header class="bg-white/80 dark:bg-ios-darkCard/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-20 shrink-0 shadow-sm" style="padding-top: env(safe-area-inset-top);">
         <div class="px-4 py-3 flex justify-center items-center">
             <h1 class="text-2xl font-bold tracking-tight">Mes Cours</h1>
@@ -186,8 +186,22 @@
             <div class="flex items-center justify-between bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 mt-2">
                 <span class="font-semibold text-gray-900 dark:text-white">Cours déjà payé</span>
                 <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input type="checkbox" id="sessionPaid" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                    <input type="checkbox" id="sessionPaid" onchange="document.getElementById('paymentMethodContainer').classList.toggle('hidden', !this.checked)" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
                     <label for="sessionPaid" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+            </div>
+
+            <!-- SÉLECTEUR DE PAIEMENT (Affiché si coché payé) -->
+            <div id="paymentMethodContainer" class="hidden mt-2 bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-2 transition-all">
+                <div class="flex bg-gray-200 dark:bg-[#1C1C1E] p-1 rounded-lg">
+                    <label class="flex-1 text-center cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="virement" class="peer hidden" checked>
+                        <div class="py-2 text-sm font-semibold rounded-md peer-checked:bg-white dark:peer-checked:bg-[#2C2C2E] peer-checked:shadow-sm text-gray-500 peer-checked:text-gray-900 dark:peer-checked:text-white transition">💳 Virement</div>
+                    </label>
+                    <label class="flex-1 text-center cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="espece" class="peer hidden">
+                        <div class="py-2 text-sm font-semibold rounded-md peer-checked:bg-white dark:peer-checked:bg-[#2C2C2E] peer-checked:shadow-sm text-gray-500 peer-checked:text-gray-900 dark:peer-checked:text-white transition">💶 Espèces</div>
+                    </label>
                 </div>
             </div>
 
@@ -233,6 +247,7 @@
                 <div class="text-center flex-1">
                     <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide mb-1">Total Encaissé</p>
                     <p class="text-xl font-bold text-ios-green"><span id="total-paid">0</span>€</p>
+                    <p class="text-[11px] font-semibold text-ios-green/80 mt-1">💳 Vir: <span id="total-paid-virement">0</span>€ | 💶 Esp: <span id="total-paid-espece">0</span>€</p>
                 </div>
                 <div class="w-px h-8 bg-gray-300 dark:bg-gray-600 mx-2"></div>
                 <div class="text-center flex-1">
@@ -257,6 +272,7 @@
             <div class="bg-ios-green/10 p-4 rounded-2xl text-center border border-ios-green/20">
                 <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide">Encaissé</p>
                 <p class="text-2xl font-bold text-ios-green" id="bilanTotalPaid">0€</p>
+                <p class="text-[10px] font-semibold text-ios-green/80 mt-1" id="bilanDetailsPaid">💳 Vir: 0€ | 💶 Esp: 0€</p>
             </div>
             <div class="bg-ios-red/10 p-4 rounded-2xl text-center border border-ios-red/20">
                 <p class="text-[10px] text-ios-red font-bold uppercase tracking-wide">En attente</p>
@@ -282,9 +298,11 @@
             <p class="text-gray-500 font-medium mt-1" id="actionDesc">Horaires</p>
         </div>
         
+        <!-- Conteneur Dynamique pour les boutons de paiement -->
+        <div id="dynamicActionButtons" class="flex flex-col gap-3 mb-3"></div>
+        
         <div class="flex flex-col gap-3">
-            <button id="btnTogglePayment" class="w-full py-4 bg-ios-blue/10 text-ios-blue font-bold text-lg rounded-2xl active:bg-ios-blue/20 transition">Changer statut paiement</button>
-            <button id="btnDeleteSession" class="w-full py-4 bg-ios-red/10 text-ios-red font-bold text-lg rounded-2xl active:bg-ios-red/20 transition">Supprimer le cours</button>
+            <button id="btnDeleteSession" class="w-full py-4 bg-ios-red/10 text-ios-red font-bold text-lg rounded-2xl active:bg-ios-red/20 transition mt-2">Supprimer le cours</button>
         </div>
     </div>
 
@@ -311,6 +329,9 @@
             
             if(id === 'sessionSheet') {
                 document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('sessionPaid').checked = false;
+                document.getElementById('paymentMethodContainer').classList.add('hidden');
+                document.querySelector('input[name="paymentMethod"][value="virement"]').checked = true;
             } else if (id === 'studentsSheet') {
                 renderManageStudents();
             } else if (id === 'bilanSheet') {
@@ -352,8 +373,8 @@
                 initialView: 'timeGridDay',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
                 locale: 'fr',
-                slotMinTime: '08:00:00', // Modifiable si tu veux voir plus tôt que 8h le matin
-                slotMaxTime: '24:00:00', // MODIFICATION ICI : Affiche le calendrier jusqu'à minuit
+                slotMinTime: '08:00:00', 
+                slotMaxTime: '24:00:00',
                 allDaySlot: false,
                 height: '100%',
                 nowIndicator: true,
@@ -362,14 +383,30 @@
                     selectedEventId = info.event.id;
                     const props = info.event.extendedProps;
                     document.getElementById('actionTitle').innerText = `${props.studentName} - ${props.amount}€`;
-                    document.getElementById('actionDesc').innerText = `${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} à ${info.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} | ${props.paid ? 'Payé ✅' : 'En attente ⏳'}`;
+                    
+                    let paymentStr = 'En attente ⏳';
+                    if(props.paid) {
+                        paymentStr = (props.paymentMethod === 'espece') ? 'Payé (Espèces) 💶' : 'Payé (Virement) 💳';
+                    }
+                    document.getElementById('actionDesc').innerText = `${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} à ${info.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} | ${paymentStr}`;
+                    
+                    // Générer dynamiquement les boutons de paiement
+                    const actionContainer = document.getElementById('dynamicActionButtons');
+                    if(props.paid) {
+                        actionContainer.innerHTML = `<button onclick="toggleSessionPayment('${info.event.id}', false)" class="w-full py-4 bg-gray-100 dark:bg-[#2C2C2E] text-gray-700 dark:text-gray-300 font-bold text-lg rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">Marquer comme non payé</button>`;
+                    } else {
+                        actionContainer.innerHTML = `
+                            <button onclick="toggleSessionPayment('${info.event.id}', true, 'virement')" class="w-full py-4 bg-ios-blue/10 text-ios-blue font-bold text-lg rounded-2xl active:bg-ios-blue/20 transition">Marquer payé (Virement)</button>
+                            <button onclick="toggleSessionPayment('${info.event.id}', true, 'espece')" class="w-full py-4 bg-ios-green/10 text-ios-green font-bold text-lg rounded-2xl active:bg-ios-green/20 transition">Marquer payé (Espèces)</button>
+                        `;
+                    }
+                    
                     openSheet('actionSheet');
                 }
             });
             calendar.render();
         });
 
-        // FONCTION D'AFFICHAGE DU CALENDRIER
         function setCalendarView(viewName) {
             calendar.changeView(viewName);
             closeAllSheets();
@@ -378,9 +415,12 @@
         function getCalendarEvents() {
             return sessions.map(session => {
                 let student = students.find(s => s.id == session.studentId);
+                let icon = '⏳';
+                if(session.paid) icon = (session.paymentMethod === 'espece') ? '💶' : '💳';
+                
                 return {
                     id: session.id,
-                    title: `${session.paid ? '✅' : '⏳'} ${student ? student.name : 'Inconnu'} (${session.amount}€)`,
+                    title: `${icon} ${student ? student.name : 'Inconnu'} (${session.amount}€)`,
                     start: `${session.date}T${session.start}`,
                     end: `${session.date}T${session.end}`,
                     backgroundColor: session.paid ? '#34C759' : '#FF3B30', 
@@ -391,13 +431,25 @@
         }
 
         function updateDashboard() {
-            let totalPaid = 0, totalPending = 0;
+            let totalPaid = 0, totalPending = 0, totalEspece = 0, totalVirement = 0;
             sessions.forEach(session => {
-                if (session.paid) totalPaid += session.amount;
-                else totalPending += session.amount;
+                if (session.paid) {
+                    totalPaid += session.amount;
+                    if (session.paymentMethod === 'espece') {
+                        totalEspece += session.amount;
+                    } else {
+                        totalVirement += session.amount; // Les anciens cours sans méthode sont considérés par défaut comme Virement
+                    }
+                } else {
+                    totalPending += session.amount;
+                }
             });
-            document.getElementById('total-paid').innerText = totalPaid;
-            document.getElementById('total-pending').innerText = totalPending;
+            // Les compteurs en haut ont été supprimés, on met à jour uniquement ceux du Bilan
+            if(document.getElementById('total-paid')) document.getElementById('total-paid').innerText = totalPaid;
+            if(document.getElementById('total-pending')) document.getElementById('total-pending').innerText = totalPending;
+            if(document.getElementById('total-paid-espece')) document.getElementById('total-paid-espece').innerText = totalEspece;
+            if(document.getElementById('total-paid-virement')) document.getElementById('total-paid-virement').innerText = totalVirement;
+            
             if (calendar) { calendar.removeAllEvents(); calendar.addEventSource(getCalendarEvents()); }
         }
 
@@ -424,12 +476,18 @@
             const start = document.getElementById('sessionStart').value;
             const end = document.getElementById('sessionEnd').value;
             const paid = document.getElementById('sessionPaid').checked;
+            const paymentMethod = paid ? document.querySelector('input[name="paymentMethod"]:checked').value : null;
 
             const student = students.find(s => s.id == studentId);
             let hours = (new Date(`${date}T${end}`) - new Date(`${date}T${start}`)) / 3600000;
             if (hours < 0) hours += 24;
 
-            sessions.push({ id: Date.now().toString(), studentId, date, start, end, paid, amount: hours * student.rate });
+            sessions.push({ 
+                id: Date.now().toString(), 
+                studentId, date, start, end, paid, paymentMethod, 
+                amount: hours * student.rate 
+            });
+            
             localStorage.setItem('tutoring_sessions', JSON.stringify(sessions));
             closeAllSheets();
             e.target.reset();
@@ -456,15 +514,16 @@
             if (student) { student.rate = parseFloat(newRate); localStorage.setItem('tutoring_students', JSON.stringify(students)); populateStudentSelect(); }
         }
 
-        document.getElementById('btnTogglePayment').addEventListener('click', () => {
-            const index = sessions.findIndex(s => s.id === selectedEventId);
+        function toggleSessionPayment(id, isPaid, method = null) {
+            const index = sessions.findIndex(s => s.id === id);
             if(index !== -1) {
-                sessions[index].paid = !sessions[index].paid;
+                sessions[index].paid = isPaid;
+                sessions[index].paymentMethod = method;
                 localStorage.setItem('tutoring_sessions', JSON.stringify(sessions));
                 updateDashboard();
                 closeAllSheets();
             }
-        });
+        }
 
         document.getElementById('btnDeleteSession').addEventListener('click', () => {
             if(confirm("Supprimer ce cours ?")) {
@@ -514,7 +573,7 @@
         function generateBilan() {
             const monthVal = document.getElementById('bilanMonthInput').value; 
             const weekVal = document.getElementById('bilanWeekInput').value; 
-            let p=0, w=0, h=0, stats={}; 
+            let p=0, w=0, h=0, pEspece=0, pVirement=0, stats={}; 
 
             sessions.forEach(sess => {
                 let match = (currentBilanType === 'month') ? sess.date.startsWith(monthVal) : (getISOWeek(new Date(sess.date)) === weekVal);
@@ -522,28 +581,59 @@
                     let hrs = (new Date(`${sess.date}T${sess.end}`) - new Date(`${sess.date}T${sess.start}`)) / 3600000;
                     if(hrs < 0) hrs += 24;
                     h += hrs;
-                    if (sess.paid) p += sess.amount; else w += sess.amount;
+                    
+                    if (sess.paid) {
+                        p += sess.amount;
+                        if(sess.paymentMethod === 'espece') pEspece += sess.amount;
+                        else pVirement += sess.amount;
+                    } else {
+                        w += sess.amount;
+                    }
 
-                    if (!stats[sess.studentId]) stats[sess.studentId] = { h:0, p:0, w:0, n: students.find(s=>s.id == sess.studentId)?.name || '?' };
+                    if (!stats[sess.studentId]) {
+                        stats[sess.studentId] = { h:0, p:0, pEspece:0, pVirement:0, w:0, n: students.find(s=>s.id == sess.studentId)?.name || '?' };
+                    }
+                    
                     stats[sess.studentId].h += hrs;
-                    if (sess.paid) stats[sess.studentId].p += sess.amount; else stats[sess.studentId].w += sess.amount;
+                    if (sess.paid) {
+                        stats[sess.studentId].p += sess.amount;
+                        if(sess.paymentMethod === 'espece') stats[sess.studentId].pEspece += sess.amount;
+                        else stats[sess.studentId].pVirement += sess.amount;
+                    } else {
+                        stats[sess.studentId].w += sess.amount;
+                    }
                 }
             });
 
             document.getElementById('bilanTotalPaid').innerText = `${p}€`;
+            document.getElementById('bilanDetailsPaid').innerText = `💳 Vir: ${pVirement}€ | 💶 Esp: ${pEspece}€`;
             document.getElementById('bilanTotalPending').innerText = `${w}€`;
             document.getElementById('bilanTotalHours').innerText = `${h}h`;
 
             const list = document.getElementById('bilanStudentList');
             list.innerHTML = '';
-            if (Object.keys(stats).length === 0) list.innerHTML = `<p class="text-center text-gray-400 mt-4 text-sm">Aucun cours.</p>`;
-            else {
+            if (Object.keys(stats).length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-400 mt-4 text-sm">Aucun cours.</p>`;
+            } else {
                 Object.values(stats).forEach(s => {
+                    // Construction du détail par élève (Virement vs Espèce)
+                    let detailsHtml = '';
+                    if (s.p > 0) {
+                        let details = [];
+                        if (s.pVirement > 0) details.push(`💳 ${s.pVirement}€`);
+                        if (s.pEspece > 0) details.push(`💶 ${s.pEspece}€`);
+                        detailsHtml = `<p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">${details.join(' | ')}</p>`;
+                    }
+
                     list.innerHTML += `
-                        <div class="flex justify-between items-center p-4 bg-gray-100 dark:bg-[#2C2C2E] rounded-2xl text-sm">
-                            <div><p class="font-bold text-lg">${s.n}</p><p class="text-gray-500 font-medium">${s.h}h de cours</p></div>
+                        <div class="flex justify-between items-center p-4 bg-gray-100 dark:bg-[#2C2C2E] rounded-2xl text-sm mb-2">
+                            <div>
+                                <p class="font-bold text-lg">${s.n}</p>
+                                <p class="text-gray-500 font-medium">${s.h}h de cours</p>
+                            </div>
                             <div class="text-right">
                                 <p class="text-ios-green font-bold text-lg">${s.p > 0 ? '+'+s.p+'€' : '-'}</p>
+                                ${detailsHtml}
                                 ${s.w > 0 ? `<p class="text-ios-red text-xs font-bold mt-1 uppercase">Reste: ${s.w}€</p>` : ''}
                             </div>
                         </div>`;
