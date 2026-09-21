@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Suivi Cours">
+    <meta name="apple-mobile-web-app-title" content="Mes Cours">
     <title>Suivi Cours Particuliers</title>
     <link rel="apple-touch-icon" href="icone.jpg">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,15 +23,16 @@
             }
         }
     </script>
+    <!-- FullCalendar -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <!-- Chart.js pour l'Analyse de Données -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
         /* Optimisations tactiles et iOS */
-        body { 
-            -webkit-tap-highlight-color: transparent; 
-            overscroll-behavior-y: none;
-        }
+        body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
         
         /* Ajustements FullCalendar pour mobile */
         .fc-header-toolbar { padding: 0.5rem 1rem; margin-bottom: 0 !important; }
@@ -48,8 +50,6 @@
             color: #FFFFFF;
         }
         html.dark .fc-theme-standard td, html.dark .fc-theme-standard th { border-color: #38383A; }
-
-        /* Pour que la vue semaine reste lisible sur petit écran iPhone */
         .fc-timegrid-slot-label { font-size: 0.7rem; }
         .fc-event-title { font-size: 0.75rem !important; font-weight: 600; }
 
@@ -68,7 +68,7 @@
 </head>
 <body class="bg-ios-bg dark:bg-ios-darkBg text-slate-900 dark:text-slate-100 flex flex-col h-screen overflow-hidden font-sans antialiased selection:bg-ios-blue selection:text-white">
 
-    <!-- HEADER (Épuré) -->
+    <!-- HEADER -->
     <header class="bg-white/80 dark:bg-ios-darkCard/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-20 shrink-0 shadow-sm" style="padding-top: env(safe-area-inset-top);">
         <div class="px-4 py-3 flex justify-center items-center">
             <h1 class="text-2xl font-bold tracking-tight">Mes Cours</h1>
@@ -86,207 +86,205 @@
 
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="fixed bottom-0 w-full bg-white/80 dark:bg-ios-darkCard/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 z-30 flex justify-around items-center px-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] dark:shadow-none" style="padding-bottom: env(safe-area-inset-bottom);">
-        
         <button onclick="toggleTheme()" class="flex flex-col items-center justify-center w-16 h-14 text-gray-400 hover:text-ios-blue dark:hover:text-ios-blue transition-colors">
             <i class="fas fa-moon text-xl mb-1 dark:hidden"></i>
             <i class="fas fa-sun text-xl mb-1 hidden dark:block text-yellow-400"></i>
             <span class="text-[10px] font-medium">Thème</span>
         </button>
-
         <button onclick="openSheet('studentsSheet')" class="flex flex-col items-center justify-center w-16 h-14 text-gray-400 hover:text-ios-blue transition-colors">
             <i class="fas fa-users text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Élèves</span>
         </button>
-
         <!-- BOUTON CENTRAL D'AJOUT -->
         <div class="relative -top-5">
             <button onclick="openAddMenu()" class="w-14 h-14 bg-ios-blue text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-105 transition-transform active:scale-95">
                 <i class="fas fa-plus"></i>
             </button>
         </div>
-
         <button onclick="openSheet('bilanSheet')" class="flex flex-col items-center justify-center w-16 h-14 text-gray-400 hover:text-ios-blue transition-colors">
             <i class="fas fa-chart-pie text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Bilan</span>
         </button>
-
-        <!-- BOUTON CHOIX DE LA VUE -->
         <button onclick="openSheet('viewSheet')" class="flex flex-col items-center justify-center w-16 h-14 text-gray-400 hover:text-ios-blue transition-colors">
             <i class="fas fa-calendar-alt text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Vue</span>
         </button>
     </nav>
 
-    <!-- OVERLAY COMMUN POUR LES BOTTOM SHEETS -->
+    <!-- OVERLAY COMMUN -->
     <div id="sheetOverlay" onclick="closeAllSheets()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
-    <!-- BOTTOM SHEET: CHOIX DE LA VUE -->
+    <!-- SHEETS SIMPLES (Vues, Ajouts, Élèves) -->
+    <!-- (Le code de ces sheets reste identique à la version précédente pour gagner de la place, jusqu'au Bilan) -->
     <div id="viewSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-6"></div>
-        <h2 class="text-xl font-bold mb-4 text-center">Affichage du Calendrier</h2>
+        <h2 class="text-xl font-bold mb-4 text-center">Affichage</h2>
         <div class="flex flex-col gap-3">
-            <button onclick="setCalendarView('timeGridDay')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">
-                <div class="w-10 h-10 rounded-full bg-ios-blue/10 text-ios-blue flex items-center justify-center text-lg"><i class="fas fa-calendar-day"></i></div>
-                <div class="text-left"><p class="font-bold text-gray-900 dark:text-white">Jour</p><p class="text-xs text-gray-500">Agenda journalier (Idéal mobile)</p></div>
-            </button>
-            <button onclick="setCalendarView('timeGridWeek')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">
-                <div class="w-10 h-10 rounded-full bg-ios-green/10 text-ios-green flex items-center justify-center text-lg"><i class="fas fa-calendar-week"></i></div>
-                <div class="text-left"><p class="font-bold text-gray-900 dark:text-white">Semaine (Agenda)</p><p class="text-xs text-gray-500">Vue en colonnes pour toute la semaine</p></div>
-            </button>
-            <button onclick="setCalendarView('listWeek')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">
-                <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center text-lg"><i class="fas fa-list"></i></div>
-                <div class="text-left"><p class="font-bold text-gray-900 dark:text-white">Semaine (Liste)</p><p class="text-xs text-gray-500">Liste déroulante des prochains cours</p></div>
-            </button>
-            <button onclick="setCalendarView('dayGridMonth')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">
-                <div class="w-10 h-10 rounded-full bg-ios-red/10 text-ios-red flex items-center justify-center text-lg"><i class="fas fa-calendar-alt"></i></div>
-                <div class="text-left"><p class="font-bold text-gray-900 dark:text-white">Mois</p><p class="text-xs text-gray-500">Vue mensuelle globale</p></div>
-            </button>
+            <button onclick="setCalendarView('timeGridDay')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 transition"><div class="w-10 h-10 rounded-full bg-ios-blue/10 text-ios-blue flex justify-center items-center"><i class="fas fa-calendar-day"></i></div><div class="text-left"><p class="font-bold">Jour</p><p class="text-xs text-gray-500">Agenda journalier</p></div></button>
+            <button onclick="setCalendarView('timeGridWeek')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 transition"><div class="w-10 h-10 rounded-full bg-ios-green/10 text-ios-green flex justify-center items-center"><i class="fas fa-calendar-week"></i></div><div class="text-left"><p class="font-bold">Semaine (Agenda)</p><p class="text-xs text-gray-500">Vue en colonnes</p></div></button>
+            <button onclick="setCalendarView('listWeek')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 transition"><div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex justify-center items-center"><i class="fas fa-list"></i></div><div class="text-left"><p class="font-bold">Semaine (Liste)</p><p class="text-xs text-gray-500">Liste des cours</p></div></button>
+            <button onclick="setCalendarView('dayGridMonth')" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 transition"><div class="w-10 h-10 rounded-full bg-ios-red/10 text-ios-red flex justify-center items-center"><i class="fas fa-calendar-alt"></i></div><div class="text-left"><p class="font-bold">Mois</p><p class="text-xs text-gray-500">Vue globale</p></div></button>
         </div>
     </div>
 
-    <!-- BOTTOM SHEET: MENU D'AJOUT (+) -->
     <div id="addMenuSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-6"></div>
         <div class="flex flex-col gap-3">
-            <button onclick="closeAllSheets(); setTimeout(() => openSheet('sessionSheet'), 300)" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">
-                <div class="w-10 h-10 rounded-full bg-ios-blue/10 text-ios-blue flex items-center justify-center text-lg"><i class="fas fa-calendar-plus"></i></div>
-                <div class="text-left"><p class="font-bold text-gray-900 dark:text-white">Nouveau Cours</p><p class="text-xs text-gray-500">Planifier une séance</p></div>
-            </button>
-            <button onclick="closeAllSheets(); setTimeout(() => openSheet('newStudentSheet'), 300)" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">
-                <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center text-lg"><i class="fas fa-user-plus"></i></div>
-                <div class="text-left"><p class="font-bold text-gray-900 dark:text-white">Nouvel Élève</p><p class="text-xs text-gray-500">Ajouter à la base de données</p></div>
-            </button>
+            <button onclick="closeAllSheets(); setTimeout(() => openSheet('sessionSheet'), 300)" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 transition"><div class="w-10 h-10 rounded-full bg-ios-blue/10 text-ios-blue flex justify-center items-center"><i class="fas fa-calendar-plus"></i></div><div class="text-left"><p class="font-bold">Nouveau Cours</p><p class="text-xs text-gray-500">Planifier une séance</p></div></button>
+            <button onclick="closeAllSheets(); setTimeout(() => openSheet('newStudentSheet'), 300)" class="w-full flex items-center gap-4 bg-gray-100 dark:bg-[#2C2C2E] p-4 rounded-2xl active:bg-gray-200 transition"><div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex justify-center items-center"><i class="fas fa-user-plus"></i></div><div class="text-left"><p class="font-bold">Nouvel Élève</p><p class="text-xs text-gray-500">Ajouter à la base</p></div></button>
         </div>
     </div>
 
-    <!-- BOTTOM SHEET: AJOUTER UN COURS -->
     <div id="sessionSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl max-h-[90vh] overflow-y-auto" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
         <h2 class="text-xl font-bold mb-6 text-center">Ajouter un cours</h2>
         <form id="sessionForm" onsubmit="saveSession(event)" class="space-y-4">
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pl-1">Élève</label>
-                <select id="sessionStudent" class="w-full bg-gray-100 dark:bg-[#2C2C2E] text-gray-900 dark:text-white rounded-xl p-4 appearance-none outline-none focus:ring-2 focus:ring-ios-blue" required></select>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pl-1">Date</label>
-                <input type="date" id="sessionDate" class="w-full bg-gray-100 dark:bg-[#2C2C2E] text-gray-900 dark:text-white rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required>
-            </div>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1 pl-1">Élève</label><select id="sessionStudent" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 appearance-none outline-none focus:ring-2 focus:ring-ios-blue" required></select></div>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1 pl-1">Date</label><input type="date" id="sessionDate" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required></div>
             <div class="flex gap-4">
-                <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pl-1">Début</label>
-                    <input type="time" id="sessionStart" class="w-full bg-gray-100 dark:bg-[#2C2C2E] text-gray-900 dark:text-white rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required>
-                </div>
-                <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pl-1">Fin</label>
-                    <input type="time" id="sessionEnd" class="w-full bg-gray-100 dark:bg-[#2C2C2E] text-gray-900 dark:text-white rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required>
-                </div>
+                <div class="flex-1"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1 pl-1">Début</label><input type="time" id="sessionStart" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required></div>
+                <div class="flex-1"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1 pl-1">Fin</label><input type="time" id="sessionEnd" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required></div>
             </div>
-            
             <div class="flex items-center justify-between bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 mt-2">
-                <span class="font-semibold text-gray-900 dark:text-white">Cours déjà payé</span>
-                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input type="checkbox" id="sessionPaid" onchange="document.getElementById('paymentMethodContainer').classList.toggle('hidden', !this.checked)" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                    <label for="sessionPaid" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                </div>
+                <span class="font-semibold">Cours déjà payé</span>
+                <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" id="sessionPaid" onchange="document.getElementById('paymentMethodContainer').classList.toggle('hidden', !this.checked)" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="sessionPaid" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div>
             </div>
-
-            <!-- SÉLECTEUR DE PAIEMENT (Affiché si coché payé) -->
             <div id="paymentMethodContainer" class="hidden mt-2 bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-2 transition-all">
                 <div class="flex bg-gray-200 dark:bg-[#1C1C1E] p-1 rounded-lg">
-                    <label class="flex-1 text-center cursor-pointer">
-                        <input type="radio" name="paymentMethod" value="virement" class="peer hidden" checked>
-                        <div class="py-2 text-sm font-semibold rounded-md peer-checked:bg-white dark:peer-checked:bg-[#2C2C2E] peer-checked:shadow-sm text-gray-500 peer-checked:text-gray-900 dark:peer-checked:text-white transition">💳 Virement</div>
-                    </label>
-                    <label class="flex-1 text-center cursor-pointer">
-                        <input type="radio" name="paymentMethod" value="espece" class="peer hidden">
-                        <div class="py-2 text-sm font-semibold rounded-md peer-checked:bg-white dark:peer-checked:bg-[#2C2C2E] peer-checked:shadow-sm text-gray-500 peer-checked:text-gray-900 dark:peer-checked:text-white transition">💶 Espèces</div>
-                    </label>
+                    <label class="flex-1 text-center cursor-pointer"><input type="radio" name="paymentMethod" value="virement" class="peer hidden" checked><div class="py-2 text-sm font-semibold rounded-md peer-checked:bg-white dark:peer-checked:bg-[#2C2C2E] peer-checked:shadow-sm text-gray-500 peer-checked:text-gray-900 dark:peer-checked:text-white transition">💳 Virement</div></label>
+                    <label class="flex-1 text-center cursor-pointer"><input type="radio" name="paymentMethod" value="espece" class="peer hidden"><div class="py-2 text-sm font-semibold rounded-md peer-checked:bg-white dark:peer-checked:bg-[#2C2C2E] peer-checked:shadow-sm text-gray-500 peer-checked:text-gray-900 dark:peer-checked:text-white transition">💶 Espèces</div></label>
                 </div>
             </div>
-
             <button type="submit" class="w-full bg-ios-blue text-white font-bold rounded-xl p-4 mt-4 active:bg-blue-600 transition shadow-md">Enregistrer le cours</button>
         </form>
     </div>
 
-    <!-- BOTTOM SHEET: AJOUTER UN ÉLÈVE -->
     <div id="newStudentSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
         <h2 class="text-xl font-bold mb-6 text-center">Nouvel Élève</h2>
         <form onsubmit="saveStudent(event)" class="space-y-4">
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pl-1">Prénom / Nom</label>
-                <input type="text" id="studentName" placeholder="Ex: Thomas" class="w-full bg-gray-100 dark:bg-[#2C2C2E] text-gray-900 dark:text-white rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pl-1">Tarif horaire (€)</label>
-                <input type="number" id="studentRate" placeholder="Ex: 25" class="w-full bg-gray-100 dark:bg-[#2C2C2E] text-gray-900 dark:text-white rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required>
-            </div>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1 pl-1">Prénom / Nom</label><input type="text" id="studentName" placeholder="Ex: Thomas" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required></div>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1 pl-1">Tarif horaire (€)</label><input type="number" id="studentRate" placeholder="Ex: 25" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-4 outline-none focus:ring-2 focus:ring-ios-blue" required></div>
             <button type="submit" class="w-full bg-purple-500 text-white font-bold rounded-xl p-4 mt-2 active:bg-purple-600 transition shadow-md">Ajouter l'élève</button>
         </form>
     </div>
 
-    <!-- BOTTOM SHEET: GESTION DES ÉLÈVES -->
     <div id="studentsSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl max-h-[85vh] flex flex-col" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4 shrink-0"></div>
         <h2 class="text-xl font-bold mb-4 text-center shrink-0">Gérer les élèves</h2>
-        <div id="manageStudentsList" class="flex-1 overflow-y-auto space-y-3 pb-4">
-            <!-- Rempli dynamiquement -->
-        </div>
+        <div id="manageStudentsList" class="flex-1 overflow-y-auto space-y-3 pb-4"></div>
     </div>
 
-    <!-- BOTTOM SHEET: BILAN -->
+    <!-- NOUVEAU BOTTOM SHEET : MODIFIER OBJECTIF -->
+    <div id="targetSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
+        <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
+        <h2 class="text-xl font-bold mb-2 text-center">Objectif Financier 🎯</h2>
+        <p class="text-center text-sm text-gray-500 mb-6">Définis ton but pour suivre ta progression.</p>
+        <div class="flex items-center bg-gray-100 dark:bg-[#2C2C2E] rounded-xl px-4 py-2 overflow-hidden mb-6 border border-ios-blue/30 focus-within:border-ios-blue transition">
+            <input type="number" id="inputTargetAmount" class="w-full py-3 bg-transparent text-2xl font-bold text-center outline-none" placeholder="Ex: 1000">
+            <span class="text-gray-400 font-bold text-xl ml-2">€</span>
+        </div>
+        <button onclick="saveTarget()" class="w-full bg-ios-blue text-white font-bold rounded-xl p-4 active:bg-blue-600 transition shadow-md">Enregistrer</button>
+    </div>
+
+    <!-- BOTTOM SHEET: BILAN COMPLET AVEC DATA ANALYTICS -->
     <div id="bilanSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 w-full bg-white dark:bg-ios-darkCard rounded-t-3xl z-50 px-6 pt-2 shadow-2xl max-h-[90vh] flex flex-col" style="padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);">
         <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4 shrink-0"></div>
-        <h2 class="text-xl font-bold mb-4 text-center shrink-0">Bilan Financier</h2>
         
-        <!-- BILAN GLOBAL -->
-        <div class="mb-5 shrink-0 bg-gray-50 dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
-            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 text-center">Bilan Global (Depuis toujours)</h3>
-            <div class="flex justify-around items-center">
-                <div class="text-center flex-1">
-                    <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide mb-1">Total Encaissé</p>
-                    <p class="text-xl font-bold text-ios-green"><span id="total-paid">0</span>€</p>
-                    <p class="text-[11px] font-semibold text-ios-green/80 mt-1">💳 Vir: <span id="total-paid-virement">0</span>€ | 💶 Esp: <span id="total-paid-espece">0</span>€</p>
-                </div>
-                <div class="w-px h-8 bg-gray-300 dark:bg-gray-600 mx-2"></div>
-                <div class="text-center flex-1">
-                    <p class="text-[10px] text-ios-red font-bold uppercase tracking-wide mb-1">Reste à Percevoir</p>
-                    <p class="text-xl font-bold text-ios-red"><span id="total-pending">0</span>€</p>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 shrink-0 text-center">Bilan Périodique</h3>
+        <!-- Toggle Période Fixé en haut -->
         <div class="flex gap-2 mb-4 shrink-0 bg-gray-100 dark:bg-[#2C2C2E] p-1 rounded-xl">
-            <button id="btnBilanMonth" onclick="setBilanType('month')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition">Mois</button>
-            <button id="btnBilanWeek" onclick="setBilanType('week')" class="flex-1 py-2 text-sm font-semibold text-gray-500 transition">Semaine</button>
+            <button id="btnBilanMonth" onclick="setBilanType('month')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition">Mensuel</button>
+            <button id="btnBilanWeek" onclick="setBilanType('week')" class="flex-1 py-2 text-sm font-semibold text-gray-500 transition">Hebdo</button>
         </div>
 
-        <div class="mb-4 shrink-0">
-            <input type="month" id="bilanMonthInput" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-3 text-center font-bold" onchange="generateBilan()">
-            <input type="week" id="bilanWeekInput" class="w-full bg-gray-100 dark:bg-[#2C2C2E] rounded-xl p-3 text-center font-bold hidden" onchange="generateBilan()">
-        </div>
+        <div class="flex-1 overflow-y-auto pb-6 space-y-6">
+            
+            <!-- Sélecteur de date (Caché mais fonctionnel, on gère par défaut la période actuelle) -->
+            <div class="hidden">
+                <input type="month" id="bilanMonthInput" onchange="generateBilan()">
+                <input type="week" id="bilanWeekInput" onchange="generateBilan()">
+            </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-4 shrink-0">
-            <div class="bg-ios-green/10 p-4 rounded-2xl text-center border border-ios-green/20">
-                <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide">Encaissé</p>
-                <p class="text-2xl font-bold text-ios-green" id="bilanTotalPaid">0€</p>
-                <p class="text-[10px] font-semibold text-ios-green/80 mt-1" id="bilanDetailsPaid">💳 Vir: 0€ | 💶 Esp: 0€</p>
-            </div>
-            <div class="bg-ios-red/10 p-4 rounded-2xl text-center border border-ios-red/20">
-                <p class="text-[10px] text-ios-red font-bold uppercase tracking-wide">En attente</p>
-                <p class="text-2xl font-bold text-ios-red" id="bilanTotalPending">0€</p>
-            </div>
-            <div class="bg-ios-blue/10 p-4 rounded-2xl text-center col-span-2 border border-ios-blue/20">
-                <p class="text-[10px] text-ios-blue font-bold uppercase tracking-wide">Volume Horaire</p>
-                <p class="text-2xl font-bold text-ios-blue" id="bilanTotalHours">0h</p>
-            </div>
-        </div>
+            <!-- DASHBOARD PRÉDICTIF -->
+            <section>
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 pl-1">Tableau de bord prédictif</h3>
+                <div class="p-5 rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-chart-line text-8xl"></i></div>
+                    
+                    <div class="flex justify-between items-end mb-1 relative z-10">
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wider opacity-80 font-bold mb-1">Projection fin de <span id="lblPeriodProj">mois</span></p>
+                            <p class="text-4xl font-black tracking-tight"><span id="bilanProjection">0</span>€</p>
+                        </div>
+                        <div class="text-right cursor-pointer bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition" onclick="openTargetModal()">
+                            <p class="text-[9px] opacity-90 uppercase tracking-wider font-bold mb-0.5">Objectif <i class="fas fa-pencil-alt ml-1"></i></p>
+                            <p class="text-sm font-bold"><span id="bilanObjectif">0</span>€</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Barre de progression -->
+                    <div class="w-full bg-black/20 rounded-full h-2.5 mt-4 relative z-10 overflow-hidden backdrop-blur-sm">
+                        <div class="bg-white h-full rounded-full transition-all duration-1000 ease-out" id="bilanProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 relative z-10">
+                        <p class="text-[10px] font-medium text-white/90" id="bilanProjectionDetails">0€ encaissés + 0€ prévus</p>
+                        <p class="text-[10px] font-bold text-white/90" id="bilanPercent">0%</p>
+                    </div>
+                </div>
+            </section>
 
-        <h3 class="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2 shrink-0">Détail par élève</h3>
-        <div id="bilanStudentList" class="flex-1 overflow-y-auto space-y-2 pb-4">
-            <!-- JS -->
+            <!-- GRAPHIQUE D'ÉVOLUTION -->
+            <section>
+                <div class="flex justify-between items-end mb-3 pl-1">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide">Évolution des revenus</h3>
+                </div>
+                <div class="w-full h-48 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-700 rounded-3xl p-3 shadow-sm">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </section>
+
+            <!-- BILAN DE LA PÉRIODE EN COURS -->
+            <section>
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 pl-1">Détails de la période</h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-ios-green/10 p-4 rounded-2xl text-center border border-ios-green/20">
+                        <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide">Encaissé</p>
+                        <p class="text-2xl font-bold text-ios-green" id="bilanTotalPaid">0€</p>
+                        <p class="text-[9px] font-semibold text-ios-green/80 mt-1" id="bilanDetailsPaid">💳 Vir: 0€ | 💶 Esp: 0€</p>
+                    </div>
+                    <div class="bg-ios-red/10 p-4 rounded-2xl text-center border border-ios-red/20">
+                        <p class="text-[10px] text-ios-red font-bold uppercase tracking-wide">En attente / Prévu</p>
+                        <p class="text-2xl font-bold text-ios-red" id="bilanTotalPending">0€</p>
+                    </div>
+                    <div class="bg-ios-blue/10 p-4 rounded-2xl text-center col-span-2 border border-ios-blue/20">
+                        <p class="text-[10px] text-ios-blue font-bold uppercase tracking-wide">Volume Horaire Période</p>
+                        <p class="text-2xl font-bold text-ios-blue" id="bilanTotalHours">0h</p>
+                    </div>
+                </div>
+
+                <div id="bilanStudentList" class="space-y-2">
+                    <!-- JS Détail élèves -->
+                </div>
+            </section>
+
+            <!-- BILAN GLOBAL ALL TIME -->
+            <section class="border-t border-gray-200 dark:border-gray-800 pt-6">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 text-center">Statistiques Globales (Depuis toujours)</h3>
+                <div class="bg-gray-50 dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm">
+                    <div class="flex justify-around items-center">
+                        <div class="text-center flex-1">
+                            <p class="text-[10px] text-ios-green font-bold uppercase tracking-wide mb-1">Total Encaissé</p>
+                            <p class="text-xl font-bold text-ios-green"><span id="total-paid-global">0</span>€</p>
+                            <p class="text-[9px] font-semibold text-ios-green/80 mt-1">💳 <span id="total-paid-virement">0</span>€ | 💶 <span id="total-paid-espece">0</span>€</p>
+                        </div>
+                        <div class="w-px h-10 bg-gray-300 dark:bg-gray-700 mx-2"></div>
+                        <div class="text-center flex-1">
+                            <p class="text-[10px] text-ios-red font-bold uppercase tracking-wide mb-1">Reste à Percevoir</p>
+                            <p class="text-xl font-bold text-ios-red"><span id="total-pending-global">0</span>€</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -297,10 +295,7 @@
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white" id="actionTitle">Élève</h2>
             <p class="text-gray-500 font-medium mt-1" id="actionDesc">Horaires</p>
         </div>
-        
-        <!-- Conteneur Dynamique pour les boutons de paiement -->
         <div id="dynamicActionButtons" class="flex flex-col gap-3 mb-3"></div>
-        
         <div class="flex flex-col gap-3">
             <button id="btnDeleteSession" class="w-full py-4 bg-ios-red/10 text-ios-red font-bold text-lg rounded-2xl active:bg-ios-red/20 transition mt-2">Supprimer le cours</button>
         </div>
@@ -318,6 +313,10 @@
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            // Redessiner le graphique si on change le thème pendant qu'il est ouvert
+            if(!document.getElementById('bilanSheet').classList.contains('sheet-hidden')){
+                renderChart(currentBilanType);
+            }
         }
         initTheme();
 
@@ -346,19 +345,7 @@
         function openAddMenu() { openSheet('addMenuSheet'); }
 
         // --- DATABASE ---
-        let students = JSON.parse(localStorage.getItem('tutoring_students'));
-        if (!students) {
-            students = [
-                { id: 1, name: 'Salaheddine', rate: 25 },
-                { id: 2, name: 'Thami', rate: 25 },
-                { id: 3, name: 'Yassir', rate: 18 },
-                { id: 4, name: 'Ofélia', rate: 35 },
-                { id: 5, name: 'Youssef', rate: 20 },
-                { id: 6, name: 'Imane', rate: 18 },
-                { id: 7, name: 'Hans', rate: 25 }
-            ];
-            localStorage.setItem('tutoring_students', JSON.stringify(students));
-        }
+        let students = JSON.parse(localStorage.getItem('tutoring_students')) || [];
         let sessions = JSON.parse(localStorage.getItem('tutoring_sessions')) || [];
 
         // --- FULLCALENDAR ---
@@ -385,44 +372,36 @@
                     document.getElementById('actionTitle').innerText = `${props.studentName} - ${props.amount}€`;
                     
                     let paymentStr = 'En attente ⏳';
-                    if(props.paid) {
-                        paymentStr = (props.paymentMethod === 'espece') ? 'Payé (Espèces) 💶' : 'Payé (Virement) 💳';
-                    }
+                    if(props.paid) paymentStr = (props.paymentMethod === 'espece') ? 'Payé (Espèces) 💶' : 'Payé (Virement) 💳';
+                    
                     document.getElementById('actionDesc').innerText = `${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} à ${info.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} | ${paymentStr}`;
                     
-                    // Générer dynamiquement les boutons de paiement
                     const actionContainer = document.getElementById('dynamicActionButtons');
                     if(props.paid) {
-                        actionContainer.innerHTML = `<button onclick="toggleSessionPayment('${info.event.id}', false)" class="w-full py-4 bg-gray-100 dark:bg-[#2C2C2E] text-gray-700 dark:text-gray-300 font-bold text-lg rounded-2xl active:bg-gray-200 dark:active:bg-gray-600 transition">Marquer comme non payé</button>`;
+                        actionContainer.innerHTML = `<button onclick="toggleSessionPayment('${info.event.id}', false)" class="w-full py-4 bg-gray-100 dark:bg-[#2C2C2E] text-gray-700 dark:text-gray-300 font-bold text-lg rounded-2xl active:bg-gray-200 transition">Marquer comme non payé</button>`;
                     } else {
                         actionContainer.innerHTML = `
                             <button onclick="toggleSessionPayment('${info.event.id}', true, 'virement')" class="w-full py-4 bg-ios-blue/10 text-ios-blue font-bold text-lg rounded-2xl active:bg-ios-blue/20 transition">Marquer payé (Virement)</button>
                             <button onclick="toggleSessionPayment('${info.event.id}', true, 'espece')" class="w-full py-4 bg-ios-green/10 text-ios-green font-bold text-lg rounded-2xl active:bg-ios-green/20 transition">Marquer payé (Espèces)</button>
                         `;
                     }
-                    
                     openSheet('actionSheet');
                 }
             });
             calendar.render();
         });
 
-        function setCalendarView(viewName) {
-            calendar.changeView(viewName);
-            closeAllSheets();
-        }
+        function setCalendarView(viewName) { calendar.changeView(viewName); closeAllSheets(); }
 
         function getCalendarEvents() {
             return sessions.map(session => {
                 let student = students.find(s => s.id == session.studentId);
                 let icon = '⏳';
                 if(session.paid) icon = (session.paymentMethod === 'espece') ? '💶' : '💳';
-                
                 return {
                     id: session.id,
                     title: `${icon} ${student ? student.name : 'Inconnu'} (${session.amount}€)`,
-                    start: `${session.date}T${session.start}`,
-                    end: `${session.date}T${session.end}`,
+                    start: `${session.date}T${session.start}`, end: `${session.date}T${session.end}`,
                     backgroundColor: session.paid ? '#34C759' : '#FF3B30', 
                     borderColor: 'transparent', textColor: '#ffffff',
                     extendedProps: { ...session, studentName: student ? student.name : 'Inconnu' }
@@ -431,25 +410,17 @@
         }
 
         function updateDashboard() {
-            let totalPaid = 0, totalPending = 0, totalEspece = 0, totalVirement = 0;
-            sessions.forEach(session => {
-                if (session.paid) {
-                    totalPaid += session.amount;
-                    if (session.paymentMethod === 'espece') {
-                        totalEspece += session.amount;
-                    } else {
-                        totalVirement += session.amount; // Les anciens cours sans méthode sont considérés par défaut comme Virement
-                    }
-                } else {
-                    totalPending += session.amount;
-                }
+            let tPaid = 0, tPending = 0, tEspece = 0, tVirement = 0;
+            sessions.forEach(s => {
+                if (s.paid) {
+                    tPaid += s.amount;
+                    if (s.paymentMethod === 'espece') tEspece += s.amount; else tVirement += s.amount;
+                } else tPending += s.amount;
             });
-            // Les compteurs en haut ont été supprimés, on met à jour uniquement ceux du Bilan
-            if(document.getElementById('total-paid')) document.getElementById('total-paid').innerText = totalPaid;
-            if(document.getElementById('total-pending')) document.getElementById('total-pending').innerText = totalPending;
-            if(document.getElementById('total-paid-espece')) document.getElementById('total-paid-espece').innerText = totalEspece;
-            if(document.getElementById('total-paid-virement')) document.getElementById('total-paid-virement').innerText = totalVirement;
-            
+            if(document.getElementById('total-paid-global')) document.getElementById('total-paid-global').innerText = tPaid;
+            if(document.getElementById('total-pending-global')) document.getElementById('total-pending-global').innerText = tPending;
+            if(document.getElementById('total-paid-espece')) document.getElementById('total-paid-espece').innerText = tEspece;
+            if(document.getElementById('total-paid-virement')) document.getElementById('total-paid-virement').innerText = tVirement;
             if (calendar) { calendar.removeAllEvents(); calendar.addEventSource(getCalendarEvents()); }
         }
 
@@ -459,16 +430,12 @@
             select.innerHTML = '';
             students.forEach(s => select.innerHTML += `<option value="${s.id}">${s.name} (${s.rate}€/h)</option>`);
         }
-
         function saveStudent(e) {
             e.preventDefault();
             students.push({ id: Date.now(), name: document.getElementById('studentName').value, rate: parseFloat(document.getElementById('studentRate').value) });
             localStorage.setItem('tutoring_students', JSON.stringify(students));
-            populateStudentSelect();
-            closeAllSheets();
-            e.target.reset();
+            populateStudentSelect(); closeAllSheets(); e.target.reset();
         }
-
         function saveSession(e) {
             e.preventDefault();
             const studentId = document.getElementById('sessionStudent').value;
@@ -482,85 +449,39 @@
             let hours = (new Date(`${date}T${end}`) - new Date(`${date}T${start}`)) / 3600000;
             if (hours < 0) hours += 24;
 
-            sessions.push({ 
-                id: Date.now().toString(), 
-                studentId, date, start, end, paid, paymentMethod, 
-                amount: hours * student.rate 
-            });
-            
+            sessions.push({ id: Date.now().toString(), studentId, date, start, end, paid, paymentMethod, amount: hours * student.rate });
             localStorage.setItem('tutoring_sessions', JSON.stringify(sessions));
-            closeAllSheets();
-            e.target.reset();
-            updateDashboard();
+            closeAllSheets(); e.target.reset(); updateDashboard();
         }
-
         function renderManageStudents() {
             const list = document.getElementById('manageStudentsList');
             list.innerHTML = '';
             students.forEach(s => {
                 list.innerHTML += `
                     <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-[#2C2C2E] rounded-2xl">
-                        <span class="font-bold text-gray-900 dark:text-white">${s.name}</span>
-                        <div class="flex items-center bg-white dark:bg-[#1C1C1E] rounded-lg px-2 overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <span class="font-bold">${s.name}</span>
+                        <div class="flex items-center bg-white dark:bg-[#1C1C1E] rounded-lg px-2 border border-gray-200 dark:border-gray-700">
                             <input type="number" value="${s.rate}" class="w-12 py-2 bg-transparent text-center font-semibold outline-none" onchange="updateStudentRate(${s.id}, this.value)">
                             <span class="text-gray-400 font-medium text-sm">€/h</span>
                         </div>
                     </div>`;
             });
         }
-
         function updateStudentRate(id, newRate) {
             const student = students.find(s => s.id === id);
             if (student) { student.rate = parseFloat(newRate); localStorage.setItem('tutoring_students', JSON.stringify(students)); populateStudentSelect(); }
         }
-
         function toggleSessionPayment(id, isPaid, method = null) {
-            const index = sessions.findIndex(s => s.id === id);
-            if(index !== -1) {
-                sessions[index].paid = isPaid;
-                sessions[index].paymentMethod = method;
-                localStorage.setItem('tutoring_sessions', JSON.stringify(sessions));
-                updateDashboard();
-                closeAllSheets();
-            }
+            const idx = sessions.findIndex(s => s.id === id);
+            if(idx !== -1) { sessions[idx].paid = isPaid; sessions[idx].paymentMethod = method; localStorage.setItem('tutoring_sessions', JSON.stringify(sessions)); updateDashboard(); closeAllSheets(); }
         }
-
         document.getElementById('btnDeleteSession').addEventListener('click', () => {
-            if(confirm("Supprimer ce cours ?")) {
-                sessions = sessions.filter(s => s.id !== selectedEventId);
-                localStorage.setItem('tutoring_sessions', JSON.stringify(sessions));
-                updateDashboard();
-                closeAllSheets();
-            }
+            if(confirm("Supprimer ce cours ?")) { sessions = sessions.filter(s => s.id !== selectedEventId); localStorage.setItem('tutoring_sessions', JSON.stringify(sessions)); updateDashboard(); closeAllSheets(); }
         });
 
-        // --- BILAN ---
+        // --- DATA ANALYTICS & BILAN ---
         let currentBilanType = 'month';
-        function initBilanDates() {
-            const today = new Date();
-            document.getElementById('bilanMonthInput').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-            document.getElementById('bilanWeekInput').value = getISOWeek(today);
-            generateBilan();
-        }
-
-        function setBilanType(type) {
-            currentBilanType = type;
-            const btnM = document.getElementById('btnBilanMonth');
-            const btnW = document.getElementById('btnBilanWeek');
-            
-            if (type === 'month') {
-                btnM.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition";
-                btnW.className = "flex-1 py-2 text-sm font-semibold text-gray-500 transition";
-                document.getElementById('bilanMonthInput').classList.remove('hidden');
-                document.getElementById('bilanWeekInput').classList.add('hidden');
-            } else {
-                btnW.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition";
-                btnM.className = "flex-1 py-2 text-sm font-semibold text-gray-500 transition";
-                document.getElementById('bilanMonthInput').classList.add('hidden');
-                document.getElementById('bilanWeekInput').classList.remove('hidden');
-            }
-            generateBilan();
-        }
+        let revenueChartInst = null;
 
         function getISOWeek(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -568,6 +489,44 @@
             let yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
             let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
             return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+        }
+
+        function initBilanDates() {
+            const today = new Date();
+            document.getElementById('bilanMonthInput').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('bilanWeekInput').value = getISOWeek(today);
+            setBilanType('month');
+        }
+
+        function setBilanType(type) {
+            currentBilanType = type;
+            const btnM = document.getElementById('btnBilanMonth');
+            const btnW = document.getElementById('btnBilanWeek');
+            if (type === 'month') {
+                btnM.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition";
+                btnW.className = "flex-1 py-2 text-sm font-semibold text-gray-500 transition";
+            } else {
+                btnW.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-[#48484A] shadow-sm transition";
+                btnM.className = "flex-1 py-2 text-sm font-semibold text-gray-500 transition";
+            }
+            generateBilan();
+            renderChart(type);
+        }
+
+        // --- DASHBOARD PRÉDICTIF (OBJECTIFS) ---
+        function openTargetModal() {
+            let currentTarget = localStorage.getItem(`tutoring_target_${currentBilanType}`) || (currentBilanType === 'month' ? 1000 : 250);
+            document.getElementById('inputTargetAmount').value = currentTarget;
+            openSheet('targetSheet');
+        }
+
+        function saveTarget() {
+            const newTarget = document.getElementById('inputTargetAmount').value;
+            if(newTarget && newTarget > 0) {
+                localStorage.setItem(`tutoring_target_${currentBilanType}`, newTarget);
+                generateBilan(); // Met à jour la jauge
+                openSheet('bilanSheet'); // Retourne au bilan
+            }
         }
 
         function generateBilan() {
@@ -586,59 +545,157 @@
                         p += sess.amount;
                         if(sess.paymentMethod === 'espece') pEspece += sess.amount;
                         else pVirement += sess.amount;
-                    } else {
-                        w += sess.amount;
-                    }
+                    } else w += sess.amount;
 
-                    if (!stats[sess.studentId]) {
-                        stats[sess.studentId] = { h:0, p:0, pEspece:0, pVirement:0, w:0, n: students.find(s=>s.id == sess.studentId)?.name || '?' };
-                    }
-                    
+                    if (!stats[sess.studentId]) stats[sess.studentId] = { h:0, p:0, pEspece:0, pVirement:0, w:0, n: students.find(s=>s.id == sess.studentId)?.name || '?' };
                     stats[sess.studentId].h += hrs;
                     if (sess.paid) {
                         stats[sess.studentId].p += sess.amount;
                         if(sess.paymentMethod === 'espece') stats[sess.studentId].pEspece += sess.amount;
                         else stats[sess.studentId].pVirement += sess.amount;
-                    } else {
-                        stats[sess.studentId].w += sess.amount;
-                    }
+                    } else stats[sess.studentId].w += sess.amount;
                 }
             });
 
+            // Mise à jour Bilan Standard
             document.getElementById('bilanTotalPaid').innerText = `${p}€`;
             document.getElementById('bilanDetailsPaid').innerText = `💳 Vir: ${pVirement}€ | 💶 Esp: ${pEspece}€`;
             document.getElementById('bilanTotalPending').innerText = `${w}€`;
             document.getElementById('bilanTotalHours').innerText = `${h}h`;
 
+            // Mise à jour Tableau de Bord Prédictif
+            let projection = p + w; // Total de la période (Déjà payé + Prévu/En attente)
+            let target = localStorage.getItem(`tutoring_target_${currentBilanType}`) || (currentBilanType === 'month' ? 1000 : 250);
+            
+            document.getElementById('bilanProjection').innerText = projection;
+            document.getElementById('bilanObjectif').innerText = target;
+            document.getElementById('lblPeriodProj').innerText = currentBilanType === 'month' ? 'mois' : 'semaine';
+            document.getElementById('bilanProjectionDetails').innerText = `${p}€ encaissés + ${w}€ prévus/attente`;
+            
+            let percent = Math.min((projection / target) * 100, 100);
+            document.getElementById('bilanProgressBar').style.width = percent + '%';
+            document.getElementById('bilanPercent').innerText = Math.round((projection / target) * 100) + '%';
+
+            // Liste élèves
             const list = document.getElementById('bilanStudentList');
             list.innerHTML = '';
-            if (Object.keys(stats).length === 0) {
-                list.innerHTML = `<p class="text-center text-gray-400 mt-4 text-sm">Aucun cours.</p>`;
-            } else {
+            if (Object.keys(stats).length === 0) list.innerHTML = `<p class="text-center text-gray-400 mt-4 text-sm">Aucun cours sur cette période.</p>`;
+            else {
                 Object.values(stats).forEach(s => {
-                    // Construction du détail par élève (Virement vs Espèce)
                     let detailsHtml = '';
                     if (s.p > 0) {
-                        let details = [];
-                        if (s.pVirement > 0) details.push(`💳 ${s.pVirement}€`);
-                        if (s.pEspece > 0) details.push(`💶 ${s.pEspece}€`);
-                        detailsHtml = `<p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">${details.join(' | ')}</p>`;
+                        let det = [];
+                        if (s.pVirement > 0) det.push(`💳 ${s.pVirement}€`);
+                        if (s.pEspece > 0) det.push(`💶 ${s.pEspece}€`);
+                        detailsHtml = `<p class="text-[11px] text-gray-500 font-medium mt-0.5">${det.join(' | ')}</p>`;
                     }
-
                     list.innerHTML += `
-                        <div class="flex justify-between items-center p-4 bg-gray-100 dark:bg-[#2C2C2E] rounded-2xl text-sm mb-2">
-                            <div>
-                                <p class="font-bold text-lg">${s.n}</p>
-                                <p class="text-gray-500 font-medium">${s.h}h de cours</p>
-                            </div>
+                        <div class="flex justify-between items-center p-4 bg-gray-100 dark:bg-[#2C2C2E] rounded-2xl text-sm">
+                            <div><p class="font-bold text-lg">${s.n}</p><p class="text-gray-500 font-medium">${s.h}h de cours</p></div>
                             <div class="text-right">
                                 <p class="text-ios-green font-bold text-lg">${s.p > 0 ? '+'+s.p+'€' : '-'}</p>
                                 ${detailsHtml}
-                                ${s.w > 0 ? `<p class="text-ios-red text-xs font-bold mt-1 uppercase">Reste: ${s.w}€</p>` : ''}
+                                ${s.w > 0 ? `<p class="text-ios-red text-xs font-bold mt-1 uppercase">Prévu: ${s.w}€</p>` : ''}
                             </div>
                         </div>`;
                 });
             }
+        }
+
+        // --- GRAPHIQUE CHART.JS ---
+        function renderChart(type) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? '#38383A' : '#E5E5EA';
+            const textColor = isDark ? '#8E8E93' : '#8E8E93';
+
+            let labels = [];
+            let dataArr = [];
+            const today = new Date();
+
+            if (type === 'month') {
+                // 6 derniers mois
+                for (let i = 5; i >= 0; i--) {
+                    let d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                    let monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    labels.push(d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.',''));
+                    
+                    // On additionne payé + en attente (car c'est le CA généré ce mois là)
+                    let sum = sessions.filter(s => s.date.startsWith(monthStr)).reduce((acc, s) => acc + s.amount, 0);
+                    dataArr.push(sum);
+                }
+            } else {
+                // 6 dernières semaines
+                for (let i = 5; i >= 0; i--) {
+                    let d = new Date(today);
+                    d.setDate(d.getDate() - (i * 7));
+                    let weekStr = getISOWeek(d);
+                    labels.push('S' + weekStr.split('W')[1]);
+                    
+                    let sum = sessions.filter(s => getISOWeek(new Date(s.date)) === weekStr).reduce((acc, s) => acc + s.amount, 0);
+                    dataArr.push(sum);
+                }
+            }
+
+            if (revenueChartInst) revenueChartInst.destroy();
+
+            // Création du dégradé pour la courbe
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 122, 255, 0.4)'); // ios-blue
+            gradient.addColorStop(1, 'rgba(0, 122, 255, 0.0)');
+
+            revenueChartInst = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenus générés (€)',
+                        data: dataArr,
+                        borderColor: '#007AFF', // ios-blue
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        tension: 0.4, // Courbe arrondie
+                        fill: true,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#007AFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+                            titleColor: isDark ? '#FFFFFF' : '#000000',
+                            bodyColor: isDark ? '#FFFFFF' : '#000000',
+                            borderColor: isDark ? '#38383A' : '#E5E5EA',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) { return context.parsed.y + ' €'; }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            suggestedMax: type === 'month' ? 1000 : 300,
+                            grid: { color: gridColor, drawBorder: false },
+                            ticks: { color: textColor, font: {size: 10, family: 'system-ui'} }
+                        },
+                        x: { 
+                            grid: { display: false, drawBorder: false },
+                            ticks: { color: textColor, font: {size: 10, family: 'system-ui'} }
+                        }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
         }
     </script>
 </body>
